@@ -47,7 +47,6 @@ const storage = new CloudinaryStorage({
 const upload = multer({storage})
 
 // Upload endpoint for images
-app.use('/images',express.static('upload/images'));
 
 app.post("/upload", upload.single('product'), (req, res) =>{ 
     res.json({
