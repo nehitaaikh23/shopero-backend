@@ -7,7 +7,7 @@ import cors from "cors";
 import { type } from "os";
 import { error, log } from "console";
 import dotenv from 'dotenv'
-import cloudinary from 'cloudinary'
+import {v2 as cloudinary} from 'cloudinary'
 import { CloudinaryStorage } from 'multer-storage-cloudinary'
 
 const port = process.env.PORT || 4000;
@@ -18,9 +18,9 @@ app.use(express.json());
 app.use(cors());
 dotenv.config();
 cloudinary.config({
-    cloud_name: process.env.CLOUD_NAME,
-    api_key: process.env.API_KEY,
-    api_secret: process.env.API_SECRET,
+    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+    api_key: process.env.CLOUDINARY_API_KEY,
+    api_secret: process.env.CLOUDINARY_SECRET_KEY,
 })
 
 
@@ -39,20 +39,39 @@ app.get('/',(req, res) => {
 const storage = new CloudinaryStorage({
     cloudinary: cloudinary,
     params: {
-        folder: "products",
+        folder: "product",
         allowed_formats: ["jpg", "png", "jpeg"],
     },
 })
 
-const upload = multer({storage})
+const upload = multer({storage: storage})
 
 // Upload endpoint for images
 
-app.post("/upload", upload.single('product'), (req, res) =>{ 
-    res.json({
-        success: true,
-        img_url: req.file.path,
-    })
+app.post("/upload", upload.single("product"), (req, res) =>{ 
+
+    try {
+        if (!req.file){
+            return res.status(400).json({
+                success: false,
+                message: "No file Uploaded"
+            })
+        }
+
+        res.json({
+            success: true,
+            img_url: req.file.path,
+        })
+
+    } catch (error) {
+        console.log("error: ", error)
+
+        return res.json({
+            success: false,
+            message: error.message
+        })
+    }
+    
 })
 
 //Schema for Creating Products for Mongoose
