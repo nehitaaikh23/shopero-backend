@@ -8,6 +8,7 @@ import { type } from "os";
 import { error, log } from "console";
 import dotenv from 'dotenv'
 import cloudinary from 'cloudinary'
+import { CloudinaryStorage } from 'multer-storage-cloudinary'
 
 const port = process.env.PORT || 4000;
 const app = express();
