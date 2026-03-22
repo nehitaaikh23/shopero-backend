@@ -84,6 +84,8 @@ const Product = mongoose.model("Product",{
     }
 })
 
+//API for adding products
+
 app.post("/addproduct", async (req, res) => {
     let products =  await Product.find({});
     let id;
@@ -129,6 +131,32 @@ app.get("/allproducts", async(req,res) => {
     let products = await Product.find({})
     console.log("All Products Fetched");
     res.send(products);
+})
+
+//API for getting single product from database
+
+app.post("/editproductentry", async(req,res) => {
+    let productId = req.body.id;
+    let productInfo = await Product.findOne({id:productId})
+    console.log(productInfo);
+    res.send(productInfo);
+})
+
+
+// API for updating product information
+
+app.post("/updateproduct",async(req,res)=> {
+    const {id, ...updates} = req.body;
+    const updatedProduct = await Product.findOneAndUpdate({id: id},{$set: updates},{new:true});
+
+    if(!updatedProduct){
+        res.status(404).json({errors: "Product Not Found"});
+    }
+
+    res.json({
+        success: true,
+        product: updatedProduct,
+    })
 })
 
 // Creating Endpoint for New Collection Data
