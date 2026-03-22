@@ -7,6 +7,7 @@ import cors from "cors";
 import { type } from "os";
 import { error, log } from "console";
 import dotenv from 'dotenv'
+import cloudinary from 'cloudinary'
 
 const port = process.env.PORT || 4000;
 const app = express();
@@ -15,6 +16,11 @@ const app = express();
 app.use(express.json());
 app.use(cors());
 dotenv.config();
+cloudinary.config({
+    cloud_name: process.env.CLOUD_NAME,
+    api_key: process.env.API_KEY,
+    api_secret: process.env.API_SECRET,
+})
 
 
 // Database Connection with MongoDB
@@ -29,11 +35,12 @@ app.get('/',(req, res) => {
 
 // Image storage engine
 
-const storage = multer.diskStorage({
-    destination: './upload/images',
-    filename: (req,file,cb) => {
-        return cb(null,`${file.fieldname}_${Date.now()}${path.extname(file.originalname)}`)
-    }
+const storage = new CloudinaryStorage({
+    cloudinary: cloudinary,
+    params: {
+        folder: "products",
+        allowed_formats: ["jpg", "png", "jpeg"],
+    },
 })
 
 const upload = multer({storage: storage})
@@ -44,7 +51,7 @@ app.use('/images',express.static('upload/images'));
 app.post("/upload", upload.single('product'), (req, res) =>{ 
     res.json({
         success: true,
-        img_url: `${process.env.BASE_URL}/images/${req.file.filename}`
+        img_url: req.file.path,
     })
 })
 
